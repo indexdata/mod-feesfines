@@ -152,16 +152,19 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
     createLocaleSettingsStub();
 
     loanPolicy = buildLoanPolicy("Loan policy");
-    loanPolicyStubMapping = createStub(ServicePath.LOAN_POLICIES_PATH, loanPolicy, loanPolicy.getId());
+    loanPolicyStubMapping = createStub(ServicePath.LOAN_POLICIES_PATH, loanPolicy,
+      loanPolicy.getId());
     overdueFinePolicy = buildOverdueFinePolicy("ofp-1" + randomId());
     createOverdueFinePolicy(overdueFinePolicy);
     lostItemFeePolicy = buildLostItemFeePolicy("lfp-1" + randomId());
     createLostItemFeePolicy(lostItemFeePolicy);
 
     ServicePoint servicePoint1 = buildServicePoint(CREATED_AT_ID_1, CREATED_AT_1);
-    servicePoint1StubMapping = createStub(ServicePath.SERVICE_POINTS_PATH, servicePoint1, servicePoint1.getId());
+    servicePoint1StubMapping = createStub(ServicePath.SERVICE_POINTS_PATH, servicePoint1,
+      servicePoint1.getId());
     ServicePoint servicePoint2 = buildServicePoint(CREATED_AT_ID_2, CREATED_AT_2);
-    servicePoint2StubMapping = createStub(ServicePath.SERVICE_POINTS_PATH, servicePoint2, servicePoint2.getId());
+    servicePoint2StubMapping = createStub(ServicePath.SERVICE_POINTS_PATH, servicePoint2,
+      servicePoint2.getId());
 
     location = buildLocation("Location");
     locationStubMapping = createStub(ServicePath.LOCATIONS_PATH, location, location.getId());
@@ -221,10 +224,12 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
     Account account = charge(USER_ID_1, 10.0, FEE_FINE_TYPE_1, null, OWNER_ID_1);
 
     createAction(USER_ID_1, 1, account, "2019-12-31 12:00:00", PAID_PARTIALLY, PAYMENT_METHOD_1,
-      3.0, 7.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO, PAYMENT_TX_INFO, CREATED_AT_ID_1, SOURCE_1);
+      3.0, 7.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO, PAYMENT_TX_INFO, CREATED_AT_ID_1,
+      SOURCE_1);
 
     createAction(USER_ID_1, 1, account, "2020-02-01 12:00:00", PAID_PARTIALLY, PAYMENT_METHOD_1,
-      3.0, 7.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO, PAYMENT_TX_INFO, CREATED_AT_ID_1, SOURCE_1);
+      3.0, 7.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO, PAYMENT_TX_INFO, CREATED_AT_ID_1,
+      SOURCE_1);
 
     requestAndCheck(emptyReport());
   }
@@ -305,17 +310,28 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
     Account account2 = charge(USER_ID_2, chargedAmount2, FEE_FINE_TYPE_2, item2.getId(), loan2,
       OWNER_ID_1, OWNER_1, chargeActionDate2, CREATED_AT_ID_2, SOURCE_2);
 
-    Feefineaction paymentAction1 = createAction(USER_ID_1, 1, account1, withTenantTz("2020-01-01 00:10:00"),
+    Feefineaction paymentAction1 = createAction(USER_ID_1, 1, account1,
+      withTenantTz("2020-01-01 00:10:00"),
       PAID_PARTIALLY, PAYMENT_METHOD_1, 3.0, 7.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO,
       PAYMENT_TX_INFO, CREATED_AT_ID_1, SOURCE_1);
 
-    Feefineaction waiveAction1 = createAction(USER_ID_1, 1, account1, withTenantTz("2020-01-01 00:20:00"),
+    Feefineaction waiveAction1 = createAction(USER_ID_1, 1, account1,
+      withTenantTz("2020-01-01 00:20:00"),
       WAIVED_PARTIALLY, WAIVE_REASON_1, 2.0, 5.0, WAIVE_STAFF_INFO, WAIVE_PATRON_INFO,
       "", CREATED_AT_ID_1, SOURCE_1);
 
-    Feefineaction paymentAction2 = createAction(USER_ID_2, 2, account2, withTenantTz("2020-01-02 03:00:00"),
+    Feefineaction paymentAction2 = createAction(USER_ID_2, 2, account2,
+      withTenantTz("2020-01-02 03:00:00"),
       PAID_FULLY, PAYMENT_METHOD_2, 100.0, 0.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO,
       PAYMENT_TX_INFO, CREATED_AT_ID_2, SOURCE_2);
+
+    Account account3 = charge(USER_ID_1, chargedAmount1, FEE_FINE_TYPE_1, null, null,
+      OWNER_ID_1, OWNER_1, chargeActionDate1, CREATED_AT_ID_1, SOURCE_1);
+
+    Feefineaction paymentAction3 = createAction(USER_ID_1, 3, account3,
+      withTenantTz("2020-01-03 00:10:00"),
+      PAID_PARTIALLY, PAYMENT_METHOD_1, 3.0, 7.0, PAYMENT_STAFF_INFO, PAYMENT_PATRON_INFO,
+      PAYMENT_TX_INFO, CREATED_AT_ID_1, SOURCE_1);
 
     requestAndCheck(new FinancialTransactionsDetailReport()
       .withReportData(List.of(
@@ -328,7 +344,7 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
           .withFeeFineSource(SOURCE_1)
           .withFeeFineId(account1.getId())
           .withAction("Payment")
-          .withActionAmount(new MonetaryValue(paymentAction1.getAmountAction()).toString())
+          .withActionAmount(paymentAction1.getAmountAction().toString())
           .withActionDate(formatReportDate(paymentAction1.getDateAction()))
           .withActionCreatedAt(CREATED_AT_1)
           .withActionSource(SOURCE_1)
@@ -372,7 +388,7 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
           .withFeeFineSource(SOURCE_1)
           .withFeeFineId(account1.getId())
           .withAction("Waive")
-          .withActionAmount(new MonetaryValue(waiveAction1.getAmountAction()).toString())
+          .withActionAmount(waiveAction1.getAmountAction().toString())
           .withActionDate(formatReportDate(waiveAction1.getDateAction()))
           .withActionCreatedAt(CREATED_AT_1)
           .withActionSource(SOURCE_1)
@@ -416,7 +432,7 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
           .withFeeFineSource(SOURCE_2)
           .withFeeFineId(account2.getId())
           .withAction("Payment")
-          .withActionAmount(new MonetaryValue(paymentAction2.getAmountAction()).toString())
+          .withActionAmount(paymentAction2.getAmountAction().toString())
           .withActionDate(formatReportDate(paymentAction2.getDateAction()))
           .withActionCreatedAt(CREATED_AT_2)
           .withActionSource(SOURCE_2)
@@ -450,24 +466,68 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
           .withLoanId(loan2.getId())
           .withHoldingsRecordId(holdingsRecord.getId())
           .withInstanceId(instance.getId())
-          .withItemId(item2.getId())
+          .withItemId(item2.getId()),
+        new FinancialTransactionsDetailReportEntry()
+          .withFeeFineOwner(OWNER_1)
+          .withFeeFineType(FEE_FINE_TYPE_1)
+          .withBilledAmount(new MonetaryValue(chargedAmount1).toString())
+          .withDateBilled(formatReportDate(parseDateTimeUTC(chargeActionDate1)))
+          .withFeeFineCreatedAt(CREATED_AT_1)
+          .withFeeFineSource(SOURCE_1)
+          .withFeeFineId(account3.getId())
+          .withAction("Payment")
+          .withActionAmount(paymentAction3.getAmountAction().toString())
+          .withActionDate(formatReportDate(paymentAction3.getDateAction()))
+          .withActionCreatedAt(CREATED_AT_1)
+          .withActionSource(SOURCE_1)
+          .withActionStatus(PAID_PARTIALLY)
+          .withActionAdditionalStaffInfo(addSuffix(PAYMENT_STAFF_INFO, 3))
+          .withActionAdditionalPatronInfo(addSuffix(PAYMENT_PATRON_INFO, 3))
+          .withPaymentMethod(PAYMENT_METHOD_1)
+          .withTransactionInfo(PAYMENT_TX_INFO)
+          .withWaiveReason("")
+          .withRefundReason("")
+          .withTransferAccount("")
+          .withPatronId(USER_ID_1)
+          .withPatronName(getFullName(user1))
+          .withPatronBarcode(USER_BARCODE_1)
+          .withPatronGroup(USER_GROUP_1)
+          .withPatronEmail(user1.getPersonal().getEmail())
+          .withInstance("")
+          .withContributors("")
+          .withItemBarcode("")
+          .withCallNumber("")
+          .withEffectiveLocation("")
+          .withLoanDate("")
+          .withDueDate("")
+          .withReturnDate("")
+          .withLoanPolicyId("")
+          .withLoanPolicyName("")
+          .withOverdueFinePolicyId("")
+          .withOverdueFinePolicyName("")
+          .withLostItemPolicyId("")
+          .withLostItemPolicyName("")
+          .withLoanId("")
+          .withHoldingsRecordId("")
+          .withInstanceId("")
+          .withItemId("")
       ))
       .withReportStats(new FinancialTransactionsDetailReportStats()
         .withByFeeFineOwner(List.of(
-          buildReportTotalsEntry(OWNER_1, "105.00", "3"),
-          buildReportTotalsEntry(FEE_FINE_OWNER_TOTALS, "105.00", "3")))
+          buildReportTotalsEntry(OWNER_1, "108.00", "4"),
+          buildReportTotalsEntry(FEE_FINE_OWNER_TOTALS, "108.00", "4")))
         .withByFeeFineType(List.of(
-          buildReportTotalsEntry(FEE_FINE_TYPE_1, "5.00", "2"),
+          buildReportTotalsEntry(FEE_FINE_TYPE_1, "8.00", "3"),
           buildReportTotalsEntry(FEE_FINE_TYPE_2, "100.00", "1"),
-          buildReportTotalsEntry(FEE_FINE_TYPE_TOTALS, "105.00", "3")))
+          buildReportTotalsEntry(FEE_FINE_TYPE_TOTALS, "108.00", "4")))
         .withByAction(List.of(
-          buildReportTotalsEntry("Payment", "103.00", "2"),
+          buildReportTotalsEntry("Payment", "106.00", "3"),
           buildReportTotalsEntry("Waive", "2.00", "1"),
-          buildReportTotalsEntry(ACTION_TOTALS, "105.00", "3")))
+          buildReportTotalsEntry(ACTION_TOTALS, "108.00", "4")))
         .withByPaymentMethod(List.of(
-          buildReportTotalsEntry(PAYMENT_METHOD_1, "3.00", "1"),
+          buildReportTotalsEntry(PAYMENT_METHOD_1, "6.00", "2"),
           buildReportTotalsEntry(PAYMENT_METHOD_2, "100.00", "1"),
-          buildReportTotalsEntry(PAYMENT_METHOD_TOTALS, "103.00", "2")))
+          buildReportTotalsEntry(PAYMENT_METHOD_TOTALS, "106.00", "3")))
         .withByWaiveReason(List.of(
           buildReportTotalsEntry(WAIVE_REASON_1, "2.00", "1"),
           buildReportTotalsEntry(WAIVE_REASON_TOTALS, "2.00", "1")))
@@ -516,7 +576,7 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
   }
 
   public void validResponseWithStubsMissing(Runnable removeStubsRunnable) {
-    Pair<Account, Feefineaction> sourceObjects =  createMinimumViableReportData();
+    Pair<Account, Feefineaction> sourceObjects = createMinimumViableReportData();
 
     removeStubsRunnable.run();
 
@@ -562,7 +622,8 @@ public class FinancialTransactionDetailReportTest extends FeeFineReportsAPITestB
     requestReport(startDate, endDate, createdAt, owner)
       .then()
       .statusCode(HttpStatus.SC_OK)
-      .body("reportData", iterableWithSize(not(0)));;
+      .body("reportData", iterableWithSize(not(0)));
+    ;
   }
 
   private Response requestReport(String startDate, String endDate, List<String> createdAt,
