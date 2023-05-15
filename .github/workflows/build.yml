@@ -1,4 +1,4 @@
-name: Build, Analyze, and Publish
+name: Build and Deploy
 on:
   push:
   pull_request:
@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    name: Build, Analyze, and Publish
+    name: Build and Deploy 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
