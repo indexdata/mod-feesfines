@@ -28,6 +28,7 @@ jobs:
           echo "MODULE_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
           echo "SHA_SHORT=$(git rev-parse --short HEAD)"
           echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-$SHA_SHORT" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
       - name: Report dependencies that are snaphots
         run: mvn dependency:list | { grep -i snapshot || true; }
@@ -71,7 +72,7 @@ jobs:
           path: ${{ env.MODULE_DESCRIPTOR }}
 
       - name: Login to dev Okapi instance
-        if: ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH" }}
         id: login-okapi
         # uses: indiesdev/curl@v1.1
         uses: cyberman54/curl@master
@@ -97,7 +98,7 @@ jobs:
           echo "OKAPI_TOKEN=${{ fromJSON(steps.login-okapi.outputs.response).headers['x-okapi-token'] }}" >> $GITHUB_ENV
 
       - name: Publish ModuleDescriptor to Okapi
-        if: ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH" }}
         id: result-okapi
         # uses: indiesdev/curl@v1.1
         uses: cyberman54/curl@master
