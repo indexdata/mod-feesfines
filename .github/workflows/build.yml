@@ -94,6 +94,7 @@ jobs:
             }
 
       - name: Get the Okapi login token
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         run: |
           echo "OKAPI_TOKEN=${{ fromJSON(steps.login-okapi.outputs.response).headers['x-okapi-token'] }}" >> $GITHUB_ENV
 
