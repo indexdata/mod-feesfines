@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: build-deploy
 on:
   push:
   pull_request:
@@ -9,8 +9,7 @@ env:
   PUBLISH_BRANCH: 'hebis-reminder-fees'
 
 jobs:
-  build:
-    name: Build and Deploy 
+  build-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,7 +23,7 @@ jobs:
           java-version: 11
           distribution: 'temurin' # Alternative distribution options are available.
 
-     - name: Gather some variables
+      - name: Gather some variables
         run: |
           echo "MODULE_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
           echo "SHA_SHORT=$(git rev-parse --short HEAD)"
@@ -72,7 +71,7 @@ jobs:
           path: ${{ env.MODULE_DESCRIPTOR }}
 
       - name: Login to dev Okapi instance
-        if ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
+        if: ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
         id: login-okapi
         # uses: indiesdev/curl@v1.1
         uses: cyberman54/curl@master
@@ -98,7 +97,7 @@ jobs:
           echo "OKAPI_TOKEN=${{ fromJSON(steps.login-okapi.outputs.response).headers['x-okapi-token'] }}" >> $GITHUB_ENV
 
       - name: Publish ModuleDescriptor to Okapi
-        if ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
+        if: ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
         id: result-okapi
         # uses: indiesdev/curl@v1.1
         uses: cyberman54/curl@master
