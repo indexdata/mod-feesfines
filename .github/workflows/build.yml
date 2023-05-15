@@ -1,37 +1,117 @@
-name: SonarCloud
+name: Build, Analyze, and Publish
 on:
   push:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  OKAPI_URL: 'https://orchid-dev-okapi.folio-dev.indexdata.com' 
+  PUBLISH_BRANCH: 'hebis-reminder-fees'
+
 jobs:
   build:
-    name: Build and analyze
+    name: Build, Analyze, and Publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           submodules: recursive
+
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: 'temurin' # Alternative distribution options are available.
+
+     - name: Gather some variables
+        run: |
+          echo "MODULE_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)"
+          echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-$SHA_SHORT" >> $GITHUB_ENV
+
+      - name: Report dependencies that are snaphots
+        run: mvn dependency:list | { grep -i snapshot || true; }
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=indexdata -Dsonar.projectKey=indexdata_${{ github.event.repository.name }}
+
+      - name: Ensure built ModuleDescriptor
+        run: |
+          if test -f "$MOD_DESCRIPTOR"; then
+            echo "Found $MOD_DESCRIPTOR"
+            echo "MODULE_DESCRIPTOR=$MOD_DESCRIPTOR" >> $GITHUB_ENV
+          else
+            echo "Could not find $MOD_DESCRIPTOR"
+            exit 1
+          fi
+        env:
+          MOD_DESCRIPTOR: './target/ModuleDescriptor.json'
+
+      - name: Read ModuleDescriptor
+        id: moduleDescriptor
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ${{ env.MODULE_DESCRIPTOR }}
+
+      - name: Login to dev Okapi instance
+        if ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
+        id: login-okapi
+        # uses: indiesdev/curl@v1.1
+        uses: cyberman54/curl@master
+        with:
+          url: "${{ env.OKAPI_URL }}/authn/login"
+          method: "POST"
+          accept: 201
+          timeout: 5000
+          retries: 3
+          headers: |
+            {
+              "content-type": "application/json",
+              "x-okapi-tenant": "supertenant"
+            }
+          body: |
+            {
+              "username": "${{ secrets.ORCHID_DEV_OKAPI_USER }}",
+              "password": "${{ secrets.ORCHID_DEV_OKAPI_PASSWORD }}"
+            }
+
+      - name: Get the Okapi login token
+        run: |
+          echo "OKAPI_TOKEN=${{ fromJSON(steps.login-okapi.outputs.response).headers['x-okapi-token'] }}" >> $GITHUB_ENV
+
+      - name: Publish ModuleDescriptor to Okapi
+        if ${{ github.ref == "refs/heads/env.PUBLISH_BRANCH" }}
+        id: result-okapi
+        # uses: indiesdev/curl@v1.1
+        uses: cyberman54/curl@master
+        with:
+          url: "${{ env.OKAPI_URL }}/_/proxy/modules"
+          method: "POST"
+          accept: 201
+          timeout: 5000
+          headers: |
+            {
+              "content-type": "application/json",
+              "x-okapi-tenant": "supertenant",
+              "x-okapi-token": "${{ env.OKAPI_TOKEN }}"
+            }
+          body: ${{ steps.moduleDescriptor.outputs.content }}
+
