@@ -32,7 +32,7 @@ jobs:
 
       - name: Set module version
         run: |
-          echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-$SHA_SHORT}" >> $GITHUB_ENV
+          echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-${SHA_SHORT}" >> $GITHUB_ENV
           
       - name: Print Module version
         run: |
