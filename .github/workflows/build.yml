@@ -33,7 +33,6 @@ jobs:
       - name: Set module version
         run: |
           echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-${SHA_SHORT}" >> $GITHUB_ENV
-          echo "Module Version: $MODULE_VERSION"
 
 
       #- name: Cache SonarCloud packages
@@ -136,3 +135,6 @@ jobs:
             }
           body: ${{ steps.moduleDescriptor.outputs.content }}
 
+      - name: Print module version to job summary
+        run: |
+          echo "#### Module Version: ${{ env.MODULE_VERSION }}" >> $GITHUB_STEP_SUMMARY
