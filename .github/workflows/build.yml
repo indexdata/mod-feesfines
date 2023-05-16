@@ -54,8 +54,6 @@ jobs:
         #run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=indexdata -Dsonar.projectKey=indexdata_${{ github.event.repository.name }}
         run: mvn -B -Dmaven.test.skip package 
 
-cat <<< $(jq '.id = "mod-feesfines-18.3.0-SNAPSHOT-malc"' ModuleDescriptor.json) > ModuleDescriptor.json
-
       - name: Update ModuleDescriptor Id
         run: |
           if test -f "$MOD_DESCRIPTOR"; then
