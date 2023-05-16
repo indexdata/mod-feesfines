@@ -1,10 +1,9 @@
 name: build-deploy
-#on:
-#  push:
-#  pull_request:
-#    types: [opened, synchronize, reopened]
+
 on:
-  workflow_dispatch
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 env:
   PUBLISH_BRANCH: 'hebis-reminder-fees'
