@@ -5,8 +5,8 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  OKAPI_URL: 'https://orchid-dev-okapi.folio-dev.indexdata.com' 
   PUBLISH_BRANCH: 'hebis-reminder-fees'
+  OKAPI_URL: 'https://orchid-dev-okapi.folio-dev.indexdata.com' 
 
 jobs:
   build-deploy:
@@ -26,7 +26,7 @@ jobs:
       - name: Gather some variables
         run: |
           echo "MODULE_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
-          echo "SHA_SHORT=$(git rev-parse --short HEAD)"
+          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-$SHA_SHORT" >> $GITHUB_ENV
           echo "CURRENT_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
@@ -74,7 +74,7 @@ jobs:
           path: ${{ env.MODULE_DESCRIPTOR }}
 
       - name: Login to dev Okapi instance
-        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         id: login-okapi
         # uses: indiesdev/curl@v1.1
         uses: cyberman54/curl@master
@@ -96,12 +96,14 @@ jobs:
             }
 
       - name: Login to Index Data Docker Hub account
+        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and publish Docker image
+        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -109,7 +111,7 @@ jobs:
           tags: indexdata/${{ env.MODULE_NAME }}:${{ env.MODULE_VERSION }}
 
       - name: Get the Okapi login token
-        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         run: |
           echo "OKAPI_TOKEN=${{ fromJSON(steps.login-okapi.outputs.response).headers['x-okapi-token'] }}" >> $GITHUB_ENV
 
