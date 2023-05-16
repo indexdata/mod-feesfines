@@ -1,8 +1,10 @@
 name: build-deploy
+#on:
+#  push:
+#  pull_request:
+#    types: [opened, synchronize, reopened]
 on:
-  push:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch
 
 env:
   PUBLISH_BRANCH: 'hebis-reminder-fees'
@@ -29,9 +31,6 @@ jobs:
           echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-$SHA_SHORT" >> $GITHUB_ENV
           echo "CURRENT_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-      - name: Report dependencies that are snaphots
-        run: mvn dependency:list | { grep -i snapshot || true; }
 
       #- name: Cache SonarCloud packages
       #  uses: actions/cache@v3
