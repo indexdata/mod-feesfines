@@ -1,4 +1,4 @@
-name: build-deploy
+name: mvn-dev-build-deploy
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   OKAPI_URL: 'https://orchid-dev-okapi.folio-dev.indexdata.com' 
 
 jobs:
-  build-deploy:
+  mvn-dev-build-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -34,13 +34,12 @@ jobs:
         run: |
           echo "MODULE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-${SHA_SHORT}" >> $GITHUB_ENV
 
-
-      #- name: Cache SonarCloud packages
-      #  uses: actions/cache@v3
-      #  with:
-      #    path: ~/.sonar/cache
-      #    key: ${{ runner.os }}-sonar
-      #    restore-keys: ${{ runner.os }}-sonar
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -49,12 +48,11 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build and analyze
+      - name: Build and SQ analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        #run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=indexdata -Dsonar.projectKey=indexdata_${{ github.event.repository.name }}
-        run: mvn -B -Dmaven.test.skip package 
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=indexdata -Dsonar.projectKey=indexdata_${{ github.event.repository.name }}
 
       - name: Update ModuleDescriptor Id
         run: |
@@ -76,9 +74,8 @@ jobs:
           path: ${{ env.MODULE_DESCRIPTOR }}
 
       - name: Login to dev Okapi instance
-        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         id: login-okapi
-        # uses: indiesdev/curl@v1.1
         uses: cyberman54/curl@master
         with:
           url: "${{ env.OKAPI_URL }}/authn/login"
@@ -98,14 +95,14 @@ jobs:
             }
 
       - name: Login to Index Data Docker Hub account
-        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and publish Docker image
-        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -113,7 +110,7 @@ jobs:
           tags: indexdata/${{ env.MODULE_NAME }}:${{ env.MODULE_VERSION }}
 
       - name: Get the Okapi login token
-        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         run: |
           echo "OKAPI_TOKEN=${{ fromJSON(steps.login-okapi.outputs.response).headers['x-okapi-token'] }}" >> $GITHUB_ENV
 
