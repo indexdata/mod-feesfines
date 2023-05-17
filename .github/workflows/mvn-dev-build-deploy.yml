@@ -123,8 +123,8 @@ jobs:
           url: "${{ env.OKAPI_URL }}/_/proxy/modules"
           method: "POST"
           accept: 201
-          timeout: 5000
-          headers: |
+          timeout: 10000
+          headers: 
             {
               "content-type": "application/json",
               "x-okapi-tenant": "supertenant",
