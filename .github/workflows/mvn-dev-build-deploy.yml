@@ -124,7 +124,7 @@ jobs:
           method: "POST"
           accept: 201
           timeout: 10000
-          headers: 
+          headers: | 
             {
               "content-type": "application/json",
               "x-okapi-tenant": "supertenant",
