@@ -106,7 +106,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: false
+          push: true
           tags: indexdata/${{ env.MODULE_NAME }}:${{ env.MODULE_VERSION }}
 
       - name: Get the Okapi login token
