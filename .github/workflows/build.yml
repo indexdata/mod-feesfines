@@ -58,7 +58,7 @@ jobs:
         run: |
           if test -f "$MOD_DESCRIPTOR"; then
             echo "Found $MOD_DESCRIPTOR"
-            cat <<< $(jq '.id = "${MODULE_NAME}-${MODULE_VERSION}"' $MOD_DESCRIPTOR) > $MOD_DESCRIPTOR
+            cat <<< $(jq '.id = "${{ env.MODULE_NAME}}-${{ env.MODULE_VERSION }}"' $MOD_DESCRIPTOR) > $MOD_DESCRIPTOR
             echo "MODULE_DESCRIPTOR=$MOD_DESCRIPTOR" >> $GITHUB_ENV
           else
             echo "Could not find $MOD_DESCRIPTOR"
@@ -72,6 +72,11 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: ${{ env.MODULE_DESCRIPTOR }}
+
+      - name: Print MD
+        run: |
+          echo "${{ steps.moduleDescriptor.outputs.content }}"
+        
 
       - name: Login to dev Okapi instance
         if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
