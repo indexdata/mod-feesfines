@@ -76,7 +76,7 @@ jobs:
           path: ${{ env.MODULE_DESCRIPTOR }}
 
       - name: Login to dev Okapi instance
-        if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
+        #if: ${{ env.CURRENT_BRANCH == env.PUBLISH_BRANCH }}
         id: login-okapi
         uses: cyberman54/curl@master
         with:
