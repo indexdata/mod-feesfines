@@ -7,6 +7,7 @@ name: k8s-deploy-latest
 
 env:
   K8S_NAMESPACE: 'orchid-dev'
+  K8S_DEPLOYMENT: 'mod-feesfines-dev'
 
 on:
   workflow_dispatch
@@ -16,18 +17,10 @@ jobs:
 
     runs-on: ubuntu-latest
     steps: 
-      - name: Deploy latest to K8s to dev1 tenant
+      - name: Deploy latest to K8s
         uses: actions-hub/kubectl@v1.21.2
         env: 
           KUBE_CONFIG: ${{ secrets.ORCHID_DEV_SA_KUBECONFIG }}
         with:
           args:
-            -n ${{ env.K8S_NAMESPACE }} rollout restart deployment mod-feesfines-dev1
-        
-      - name: Deploy latest to K8s to dev2 tenant
-        uses: actions-hub/kubectl@v1.21.2
-        env: 
-          KUBE_CONFIG: ${{ secrets.ORCHID_DEV_SA_KUBECONFIG }}
-        with:
-          args:
-            -n ${{ env.K8S_NAMESPACE }} rollout restart deployment mod-feesfines-dev2
+            -n ${{ env.K8S_NAMESPACE }} rollout restart deployment ${{ env.K8S_DEPLOYMENT }}
