@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  PUBLISH_BRANCH: 'hebis-reminder-fees'
+  PUBLISH_BRANCH: 'deployment'
   OKAPI_URL: 'https://orchid-dev-okapi.folio-dev.indexdata.com' 
 
 jobs:
