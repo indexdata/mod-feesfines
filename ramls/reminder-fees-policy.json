@@ -12,6 +12,14 @@
       "description": "Ignore grace period for recall",
       "type": "boolean"
     },
+    "ignoreGracePeriodHolds": {
+      "description": "Ignore grace period for holds",
+      "type": "boolean"
+    },
+    "allowRenewalOfItemsWithReminderFees": {
+      "description": "Allow renewal of items with reminder fee(s)",
+      "type": "boolean"
+    },
     "clearPatronBlockWhenPaid": {
       "description": "Clear patron block when paid",
       "type": "boolean"
@@ -32,7 +40,8 @@
             "type": "string",
             "enum":[
               "day",
-              "week"
+              "week",
+              "minute"
             ]
           },
           "reminderFee": {
@@ -40,20 +49,28 @@
             "javaType": "org.folio.rest.domain.MonetaryValue",
             "type": "number"
           },
-          "noticeMethodId": {
+          "noticeFormat": {
             "description": "Method of sending notice",
             "type": "string",
             "enum": [
-              "email",
-              "mail"
+              "Email",
+              "Print",
+              "None"
             ]
           },
           "noticeTemplateId": {
             "description": "Id of reminder notice template",
             "$ref": "raml-util/schemas/uuid.schema"
+          },
+          "blockTemplateId": {
+            "description": "Id of block reminder template",
+            "$ref": "raml-util/schemas/uuid.schema"
           }
-        }
+        },
+        "additionalProperties": false,
+        "required": ["interval", "timeUnitId", "reminderFee", "noticeMethodId", "noticeTemplateId"]
       }
     }
-  }
+  },
+  "additionalProperties": false
 }

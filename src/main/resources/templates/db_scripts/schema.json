@@ -48,6 +48,18 @@
         {
           "fieldName": "ownerId",
           "tOps": "ADD"
+        },
+        {
+          "fieldName": "status.name",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "itemId",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
@@ -139,11 +151,16 @@
       ]
     }
   ],
-  "scripts":[
+  "scripts": [
     {
       "run": "after",
       "snippetPath": "add-lost-fee-for-actual-cost.sql",
       "fromModuleVersion": "15.10.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "add-reminder-fee.sql",
+      "fromModuleVersion": "18.3.0"
     },
     {
       "run": "after",
