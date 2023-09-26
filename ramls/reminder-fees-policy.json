@@ -41,6 +41,7 @@
             "enum":[
               "day",
               "week",
+              "hour",
               "minute"
             ]
           },
