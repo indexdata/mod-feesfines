@@ -4,8 +4,8 @@
   "description": "Reminder fee policy as part of overdue fine policy",
   "type": "object",
   "properties": {
-    "countClosed": {
-      "description": "A flag to determine if a reminder fee should take closed days into account",
+    "doNotSendUponClosedDay": {
+      "description": "Defines if a reminder scheduled for a closed day should be postponed to the next open day",
       "type": "boolean"
     },
     "ignoreGracePeriodRecall": {
